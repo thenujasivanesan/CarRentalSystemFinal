@@ -1,0 +1,148 @@
+@model BookingViewModel
+@{
+    ViewData["Title"] = "Book Car";
+}
+
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="@Url.Action("Index", "Home")">Home</a></li>
+        <li class="breadcrumb-item"><a href="@Url.Action("CarDetails", "Home", new { id = Model.CarID })">@Model.CarName</a></li>
+        <li class="breadcrumb-item active">Book Car</li>
+    </ol>
+</nav>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h4><i class="bi bi-car-front"></i> Car Details</h4>
+            </div>
+            <div class="card-body">
+                @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                {
+                    <img src="@Model.ImageUrl" class="img-fluid rounded mb-3" alt="@Model.CarName">
+                }
+                else if (!string.IsNullOrEmpty(Model.ImagePath))
+                {
+                    <img src="@Url.Content("~/uploads/" + Model.ImagePath)" class="img-fluid rounded mb-3" alt="@Model.CarName">
+                }
+                else
+                {
+                    <div class="bg-light d-flex align-items-center justify-content-center rounded mb-3" style="height: 200px;">
+                        <i class="bi bi-car-front display-1 text-muted"></i>
+                    </div>
+                }
+                
+                <h5>@Model.CarName</h5>
+                <p class="text-muted">Model: @Model.CarModel</p>
+                <p class="h6 text-primary">Daily Rate: $@Model.DailyRate.ToString("F2")</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h4><i class="bi bi-calendar-check"></i> Booking Details</h4>
+            </div>
+            <div class="card-body">
+                <form asp-action="Book" method="post">
+                    <input asp-for="CarID" type="hidden" />
+                    <input asp-for="CarName" type="hidden" />
+                    <input asp-for="CarModel" type="hidden" />
+                    <input asp-for="ImageUrl" type="hidden" />
+                    <input asp-for="ImagePath" type="hidden" />
+                    <input asp-for="DailyRate" type="hidden" />
+                    
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                    
+                    <div class="mb-3">
+                        <label asp-for="PickupDate" class="form-label">Pickup Date</label>
+                        <input asp-for="PickupDate" class="form-control" type="date" min="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                        <span asp-validation-for="PickupDate" class="text-danger"></span>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label asp-for="ReturnDate" class="form-label">Return Date</label>
+                        <input asp-for="ReturnDate" class="form-control" type="date" min="@DateTime.Today.AddDays(1).ToString("yyyy-MM-dd")" />
+                        <span asp-validation-for="ReturnDate" class="text-danger"></span>
+                    </div>
+                    
+                    <div class="card bg-light mb-3">
+                        <div class="card-body">
+                            <h6>Booking Summary</h6>
+                            <div class="row">
+                                <div class="col-6">Daily Rate:</div>
+                                <div class="col-6 text-end">$<span id="dailyRate">@Model.DailyRate.ToString("F2")</span></div>
+                            </div>
+                            <div class="row">
+                                <div class="col-6">Number of Days:</div>
+                                <div class="col-6 text-end"><span id="numberOfDays">1</span></div>
+                            </div>
+                            <hr>
+                            <div class="row">
+                                <div class="col-6"><strong>Total Cost:</strong></div>
+                                <div class="col-6 text-end"><strong>$<span id="totalCost">@Model.DailyRate.ToString("F2")</span></strong></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-success btn-lg">
+                            <i class="bi bi-check-circle"></i> Confirm Booking
+                        </button>
+                        <a href="@Url.Action("CarDetails", "Home", new { id = Model.CarID })" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left"></i> Back to Car Details
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        function calculateTotal() {
+            const pickupDate = new Date(document.getElementById('PickupDate').value);
+            const returnDate = new Date(document.getElementById('ReturnDate').value);
+            const dailyRate = parseFloat(@Model.DailyRate);
+            
+            if (pickupDate && returnDate && returnDate > pickupDate) {
+                const timeDiff = returnDate.getTime() - pickupDate.getTime();
+                const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
+                const totalCost = daysDiff * dailyRate;
+                
+                document.getElementById('numberOfDays').textContent = daysDiff;
+                document.getElementById('totalCost').textContent = totalCost.toFixed(2);
+            } else {
+                document.getElementById('numberOfDays').textContent = '1';
+                document.getElementById('totalCost').textContent = dailyRate.toFixed(2);
+            }
+        }
+        
+        document.getElementById('PickupDate').addEventListener('change', calculateTotal);
+        document.getElementById('ReturnDate').addEventListener('change', calculateTotal);
+        
+        // Set minimum return date when pickup date changes
+        document.getElementById('PickupDate').addEventListener('change', function() {
+            const pickupDate = new Date(this.value);
+            const returnDateInput = document.getElementById('ReturnDate');
+            const minReturnDate = new Date(pickupDate);
+            minReturnDate.setDate(minReturnDate.getDate() + 1);
+            returnDateInput.min = minReturnDate.toISOString().split('T')[0];
+            
+            // If current return date is before new minimum, update it
+            if (new Date(returnDateInput.value) <= pickupDate) {
+                returnDateInput.value = minReturnDate.toISOString().split('T')[0];
+            }
+            
+            calculateTotal();
+        });
+        
+        // Initial calculation
+        calculateTotal();
+    </script>
+}

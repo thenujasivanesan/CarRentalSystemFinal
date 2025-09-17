@@ -1,0 +1,145 @@
+@model IEnumerable<Booking>
+@{
+    ViewData["Title"] = "All Bookings";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-calendar-check"></i> All Bookings</h2>
+    <div>
+        <a href="@Url.Action("Index", "Reports")" class="btn btn-outline-success">
+            <i class="bi bi-file-earmark-text"></i> Generate Report
+        </a>
+        <a href="@Url.Action("Dashboard", "Admin")" class="btn btn-outline-primary">
+            <i class="bi bi-house"></i> Dashboard
+        </a>
+    </div>
+</div>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle"></i> @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<!-- Summary Cards -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body text-center">
+                <h4>@Model.Count()</h4>
+                <p class="mb-0">Total Bookings</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body text-center">
+                <h4>$@Model.Sum(b => b.TotalCost).ToString("F2")</h4>
+                <p class="mb-0">Total Revenue</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body text-center">
+                <h4>@Model.Select(b => b.CustomerID).Distinct().Count()</h4>
+                <p class="mb-0">Unique Customers</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body text-center">
+                <h4>@Model.Sum(b => (b.ReturnDate - b.PickupDate).Days)</h4>
+                <p class="mb-0">Total Days</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        @if (Model.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Booking ID</th>
+                            <th>Customer</th>
+                            <th>Car</th>
+                            <th>Image</th>
+                            <th>Pickup Date</th>
+                            <th>Return Date</th>
+                            <th>Days</th>
+                            <th>Total Cost</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var booking in Model)
+                        {
+                            var days = (booking.ReturnDate - booking.PickupDate).Days;
+                            <tr>
+                                <td>
+                                    <strong>#@booking.BookingID</strong>
+                                </td>
+                                <td>
+                                    <strong>@booking.Customer.Username</strong><br>
+                                    <small class="text-muted">Customer ID: @booking.CustomerID</small>
+                                </td>
+                                <td>
+                                    <strong>@booking.Car.CarName</strong><br>
+                                    <small class="text-muted">@booking.Car.CarModel</small>
+                                </td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(booking.Car.ImageUrl))
+                                    {
+                                        <img src="@booking.Car.ImageUrl" alt="@booking.Car.CarName" class="img-thumbnail" style="width: 60px; height: 45px; object-fit: cover;">
+                                    }
+                                    else if (!string.IsNullOrEmpty(booking.Car.ImagePath))
+                                    {
+                                        <img src="@Url.Content("~/uploads/" + booking.Car.ImagePath)" alt="@booking.Car.CarName" class="img-thumbnail" style="width: 60px; height: 45px; object-fit: cover;">
+                                    }
+                                    else
+                                    {
+                                        <div class="bg-light d-flex align-items-center justify-content-center img-thumbnail" style="width: 60px; height: 45px;">
+                                            <i class="bi bi-car-front text-muted"></i>
+                                        </div>
+                                    }
+                                </td>
+                                <td>@booking.PickupDate.ToString("MMM dd, yyyy")</td>
+                                <td>@booking.ReturnDate.ToString("MMM dd, yyyy")</td>
+                                <td>
+                                    <span class="badge bg-info">@days day@(days != 1 ? "s" : "")</span>
+                                </td>
+                                <td>
+                                    <strong class="text-success">$@booking.TotalCost.ToString("F2")</strong>
+                                </td>
+                                <td>
+                                    <form asp-action="Cancel" asp-route-id="@booking.BookingID" method="post" class="d-inline">
+                                        <button type="submit" class="btn btn-outline-danger btn-sm" 
+                                                onclick="return confirm('Are you sure you want to cancel this booking? The car will become available again.')"
+                                                title="Cancel Booking">
+                                            <i class="bi bi-x-circle"></i> Cancel
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-5">
+                <i class="bi bi-calendar-x display-1 text-muted"></i>
+                <h4 class="text-muted">No bookings found</h4>
+                <p class="text-muted">No customers have made any bookings yet.</p>
+            </div>
+        }
+    </div>
+</div>

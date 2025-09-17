@@ -1,0 +1,145 @@
+@model Car
+@{
+    ViewData["Title"] = "Car Details - " + Model.CarName;
+}
+
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="@Url.Action("Index", "Home")">Home</a></li>
+        <li class="breadcrumb-item active">@Model.CarName</li>
+    </ol>
+</nav>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            @if (!string.IsNullOrEmpty(Model.ImageUrl))
+            {
+                <img src="@Model.ImageUrl" class="card-img-top" alt="@Model.CarName" style="height: 400px; object-fit: cover;">
+            }
+            else if (!string.IsNullOrEmpty(Model.ImagePath))
+            {
+                <img src="@Url.Content("~/uploads/" + Model.ImagePath)" class="card-img-top" alt="@Model.CarName" style="height: 400px; object-fit: cover;">
+            }
+            else
+            {
+                <div class="card-img-top d-flex align-items-center justify-content-center bg-light" style="height: 400px;">
+                    <i class="bi bi-car-front display-1 text-muted"></i>
+                </div>
+            }
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="mb-0">@Model.CarName</h2>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-sm-4"><strong>Brand:</strong></div>
+                    <div class="col-sm-8">@Model.Brand</div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-sm-4"><strong>Model Year:</strong></div>
+                    <div class="col-sm-8">@Model.CarModel</div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-sm-4"><strong>Seats:</strong></div>
+                    <div class="col-sm-8">
+                        <i class="bi bi-people"></i> @Model.Seats passengers
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-sm-4"><strong>Status:</strong></div>
+                    <div class="col-sm-8">
+                        <span class="badge @(Model.IsAvailable ? "bg-success" : "bg-danger") fs-6">
+                            @(Model.IsAvailable ? "Available" : "Booked")
+                        </span>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-sm-4"><strong>Daily Rate:</strong></div>
+                    <div class="col-sm-8">
+                        <span class="h5 text-primary">$50.00</span> per day
+                    </div>
+                </div>
+                
+                <hr>
+                
+                <div class="d-grid gap-2">
+                    @if (Model.IsAvailable)
+                    {
+                        @if (ViewBag.IsCustomer)
+                        {
+                            <a href="@Url.Action("Book", "Bookings", new { carId = Model.CarID })" class="btn btn-success btn-lg">
+                                <i class="bi bi-calendar-check"></i> Book This Car
+                            </a>
+                        }
+                        else if (!ViewBag.IsLoggedIn)
+                        {
+                            <a href="@Url.Action("Login", "Account")" class="btn btn-warning btn-lg">
+                                <i class="bi bi-box-arrow-in-right"></i> Login to Book
+                            </a>
+                            <small class="text-muted text-center">
+                                Don't have an account? <a href="@Url.Action("Register", "Account")">Register here</a>
+                            </small>
+                        }
+                        else
+                        {
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle"></i> Only customers can book cars.
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <button class="btn btn-secondary btn-lg" disabled>
+                            <i class="bi bi-x-circle"></i> Currently Booked
+                        </button>
+                    }
+                    
+                    <a href="@Url.Action("Index", "Home")" class="btn btn-outline-primary">
+                        <i class="bi bi-arrow-left"></i> Back to Cars
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h4><i class="bi bi-info-circle"></i> Rental Information</h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Rental Terms:</h6>
+                        <ul>
+                            <li>Minimum rental period: 1 day</li>
+                            <li>Daily rate: $50.00</li>
+                            <li>Valid driver's license required</li>
+                            <li>Minimum age: 21 years</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>What's Included:</h6>
+                        <ul>
+                            <li>Comprehensive insurance</li>
+                            <li>24/7 roadside assistance</li>
+                            <li>Free cancellation up to 24 hours</li>
+                            <li>Unlimited mileage</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,140 @@
+@model IEnumerable<Booking>
+@{
+    ViewData["Title"] = "Customer Dashboard";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-person-circle"></i> Customer Dashboard</h2>
+    <div class="text-muted">Welcome, @Context.Session.GetString("Username")</div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4>@ViewBag.TotalBookings</h4>
+                        <p class="mb-0">Total Bookings</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="bi bi-calendar-check display-4"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4>$@ViewBag.TotalSpent.ToString("F2")</h4>
+                        <p class="mb-0">Total Spent</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="bi bi-currency-dollar display-4"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="bi bi-lightning"></i> Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="row justify-content-center">
+                    <div class="col-md-4 col-lg-3 mb-2">
+                        <a href="@Url.Action("Index", "Home")" class="btn btn-primary w-100">
+                            <i class="bi bi-search"></i> Browse Cars
+                        </a>
+                    </div>
+                    <div class="col-md-4 col-lg-3 mb-2">
+                        <a href="@Url.Action("MyBookings", "Bookings")" class="btn btn-outline-primary w-100">
+                            <i class="bi bi-calendar-check"></i> My Bookings
+                        </a>
+                    </div>
+                    <div class="col-md-4 col-lg-3 mb-2">
+                        <a href="@Url.Action("Profile", "Customer")" class="btn btn-outline-info w-100">
+                            <i class="bi bi-person-circle"></i> My Profile
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Bookings -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="bi bi-clock-history"></i> Recent Bookings</h5>
+            </div>
+            <div class="card-body">
+                @if (Model.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Booking ID</th>
+                                    <th>Car</th>
+                                    <th>Pickup Date</th>
+                                    <th>Return Date</th>
+                                    <th>Total Cost</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var booking in Model)
+                                {
+                                    <tr>
+                                        <td>#@booking.BookingID</td>
+                                        <td>@booking.Car.CarName (@booking.Car.CarModel)</td>
+                                        <td>@booking.PickupDate.ToString("MMM dd, yyyy")</td>
+                                        <td>@booking.ReturnDate.ToString("MMM dd, yyyy")</td>
+                                        <td>$@booking.TotalCost.ToString("F2")</td>
+                                        <td>
+                                            <form asp-controller="Bookings" asp-action="Cancel" asp-route-id="@booking.BookingID" method="post" class="d-inline">
+                                                <button type="submit" class="btn btn-outline-danger btn-sm" onclick="return confirm('Are you sure you want to cancel this booking?')">
+                                                    <i class="bi bi-x-circle"></i> Cancel
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="text-center mt-3">
+                        <a href="@Url.Action("MyBookings", "Bookings")" class="btn btn-outline-primary">
+                            View All Bookings <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center text-muted py-4">
+                        <i class="bi bi-calendar-x display-1"></i>
+                        <h4>No bookings yet</h4>
+                        <p>Start by browsing our available cars</p>
+                        <a href="@Url.Action("Index", "Home")" class="btn btn-primary">
+                            <i class="bi bi-search"></i> Browse Cars
+                        </a>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

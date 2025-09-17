@@ -1,0 +1,100 @@
+@model Car
+@{
+    ViewData["Title"] = "Car Details";
+}
+
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="@Url.Action("Dashboard", "Admin")">Dashboard</a></li>
+        <li class="breadcrumb-item"><a href="@Url.Action("Index", "Cars")">Car Management</a></li>
+        <li class="breadcrumb-item active">Car Details</li>
+    </ol>
+</nav>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            @if (!string.IsNullOrEmpty(Model.ImageUrl))
+            {
+                <img src="@Model.ImageUrl" class="card-img-top" alt="@Model.CarName" style="height: 400px; object-fit: cover;">
+            }
+            else if (!string.IsNullOrEmpty(Model.ImagePath))
+            {
+                <img src="@Url.Content("~/uploads/" + Model.ImagePath)" class="card-img-top" alt="@Model.CarName" style="height: 400px; object-fit: cover;">
+            }
+            else
+            {
+                <div class="card-img-top d-flex align-items-center justify-content-center bg-light" style="height: 400px;">
+                    <i class="bi bi-car-front display-1 text-muted"></i>
+                </div>
+            }
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="mb-0">@Model.CarName</h2>
+            </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-4">Car ID:</dt>
+                    <dd class="col-sm-8">#@Model.CarID</dd>
+
+                    <dt class="col-sm-4">Car Name:</dt>
+                    <dd class="col-sm-8">@Model.CarName</dd>
+
+                    <dt class="col-sm-4">Brand:</dt>
+                    <dd class="col-sm-8">@Model.Brand</dd>
+
+                    <dt class="col-sm-4">Model Year:</dt>
+                    <dd class="col-sm-8">@Model.CarModel</dd>
+
+                    <dt class="col-sm-4">Seats:</dt>
+                    <dd class="col-sm-8">
+                        <i class="bi bi-people"></i> @Model.Seats passengers
+                    </dd>
+
+                    <dt class="col-sm-4">Status:</dt>
+                    <dd class="col-sm-8">
+                        <span class="badge @(Model.IsAvailable ? "bg-success" : "bg-danger") fs-6">
+                            @(Model.IsAvailable ? "Available" : "Booked")
+                        </span>
+                    </dd>
+                    
+                    <dt class="col-sm-4">Image Source:</dt>
+                    <dd class="col-sm-8">
+                        @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                        {
+                            <span class="badge bg-info">URL</span>
+                            <small class="text-muted d-block">@Model.ImageUrl</small>
+                        }
+                        else if (!string.IsNullOrEmpty(Model.ImagePath))
+                        {
+                            <span class="badge bg-primary">Uploaded File</span>
+                            <small class="text-muted d-block">@Model.ImagePath</small>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">No Image</span>
+                        }
+                    </dd>
+                </dl>
+                
+                <hr>
+                
+                <div class="d-grid gap-2">
+                    <a href="@Url.Action("Edit", new { id = Model.CarID })" class="btn btn-warning">
+                        <i class="bi bi-pencil"></i> Edit Car
+                    </a>
+                    <a href="@Url.Action("Delete", new { id = Model.CarID })" class="btn btn-danger">
+                        <i class="bi bi-trash"></i> Delete Car
+                    </a>
+                    <a href="@Url.Action("Index")" class="btn btn-outline-primary">
+                        <i class="bi bi-arrow-left"></i> Back to Car List
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

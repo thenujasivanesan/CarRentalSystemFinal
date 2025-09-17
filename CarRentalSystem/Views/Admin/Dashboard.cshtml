@@ -1,0 +1,167 @@
+@model IEnumerable<Booking>
+@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-speedometer2"></i> Admin Dashboard</h2>
+    <div class="text-muted">Welcome, @Context.Session.GetString("Username")</div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4>@ViewBag.TotalCars</h4>
+                        <p class="mb-0">Total Cars</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="bi bi-car-front display-4"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4>@ViewBag.AvailableCars</h4>
+                        <p class="mb-0">Available Cars</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="bi bi-check-circle display-4"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4>@ViewBag.TotalBookings</h4>
+                        <p class="mb-0">Total Bookings</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="bi bi-calendar-check display-4"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4>@ViewBag.TotalCustomers</h4>
+                        <p class="mb-0">Total Customers</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="bi bi-people display-4"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="bi bi-lightning"></i> Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 mb-2">
+                        <a href="@Url.Action("Create", "Cars")" class="btn btn-primary w-100">
+                            <i class="bi bi-plus-circle"></i> Add New Car
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <a href="@Url.Action("Index", "Cars")" class="btn btn-outline-primary w-100">
+                            <i class="bi bi-car-front"></i> Manage Cars
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <a href="@Url.Action("All", "Bookings")" class="btn btn-outline-info w-100">
+                            <i class="bi bi-calendar-check"></i> View All Bookings
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <a href="@Url.Action("Index", "Reports")" class="btn btn-outline-success w-100">
+                            <i class="bi bi-file-earmark-text"></i> Generate Reports
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Bookings -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="bi bi-clock-history"></i> Recent Bookings</h5>
+            </div>
+            <div class="card-body">
+                @if (Model.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Booking ID</th>
+                                    <th>Customer</th>
+                                    <th>Car</th>
+                                    <th>Pickup Date</th>
+                                    <th>Return Date</th>
+                                    <th>Total Cost</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var booking in Model)
+                                {
+                                    <tr>
+                                        <td>#@booking.BookingID</td>
+                                        <td>@booking.Customer.Username</td>
+                                        <td>@booking.Car.CarName (@booking.Car.CarModel)</td>
+                                        <td>@booking.PickupDate.ToString("MMM dd, yyyy")</td>
+                                        <td>@booking.ReturnDate.ToString("MMM dd, yyyy")</td>
+                                        <td>$@booking.TotalCost.ToString("F2")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="text-center mt-3">
+                        <a href="@Url.Action("All", "Bookings")" class="btn btn-outline-primary">
+                            View All Bookings <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center text-muted">
+                        <i class="bi bi-inbox display-1"></i>
+                        <p>No bookings yet</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
