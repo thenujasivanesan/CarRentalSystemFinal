@@ -1,0 +1,216 @@
+@model User
+@{
+    ViewData["Title"] = "Customer Details - " + Model.FullName;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-person-circle"></i> Customer Details</h2>
+    <div>
+        <a href="@Url.Action("Customers", "Admin")" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Customers
+        </a>
+    </div>
+</div>
+
+<!-- Customer Information Cards -->
+<div class="row mb-4">
+    <!-- Personal Information -->
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="bi bi-person-vcard"></i> Personal Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label text-muted">Full Name</label>
+                            <p class="fw-bold">@Model.FullName</p>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-muted">Email</label>
+                            <p>@Model.Email</p>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-muted">Phone Number</label>
+                            <p>@Model.PhoneNumber</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label text-muted">Username</label>
+                            <p>@Model.Username</p>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-muted">NIC Number</label>
+                            <p>@Model.NICNumber</p>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-muted">Customer ID</label>
+                            <p><span class="badge bg-primary">@Model.UserID</span></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <div class="mb-3">
+                            <label class="form-label text-muted">Address</label>
+                            <p>@Model.Address</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics -->
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="bi bi-graph-up"></i> Statistics</h5>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-3">
+                    <h3 class="text-primary">@ViewBag.TotalBookings</h3>
+                    <p class="text-muted mb-0">Total Bookings</p>
+                </div>
+                <hr>
+                <div class="text-center mb-3">
+                    <h3 class="text-success">@ViewBag.TotalSpent.ToString("C")</h3>
+                    <p class="text-muted mb-0">Total Spent</p>
+                </div>
+                <hr>
+                <div class="text-center">
+                    <h3 class="text-info">@ViewBag.AvgBookingValue.ToString("C")</h3>
+                    <p class="text-muted mb-0">Avg. Booking Value</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Customer Status -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="bi bi-info-circle"></i> Customer Status</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="text-center">
+                            @if (ViewBag.TotalBookings > 0)
+                            {
+                                <span class="badge bg-success fs-6">Active Customer</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary fs-6">New Customer</span>
+                            }
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-center">
+                            @if (ViewBag.TotalBookings >= 5)
+                            {
+                                <span class="badge bg-warning fs-6">Frequent Customer</span>
+                            }
+                            else if (ViewBag.TotalBookings >= 3)
+                            {
+                                <span class="badge bg-info fs-6">Regular Customer</span>
+                            }
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-center">
+                            @if (ViewBag.TotalSpent >= 500)
+                            {
+                                <span class="badge bg-danger fs-6">VIP Customer</span>
+                            }
+                            else if (ViewBag.TotalSpent >= 200)
+                            {
+                                <span class="badge bg-primary fs-6">Premium Customer</span>
+                            }
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-center">
+                            <span class="badge bg-dark fs-6">Member Since Registration</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Booking History -->
+<div class="card">
+    <div class="card-header">
+        <h5><i class="bi bi-calendar-check"></i> Booking History</h5>
+    </div>
+    <div class="card-body">
+        @if (Model.Bookings.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Booking ID</th>
+                            <th>Car</th>
+                            <th>Pickup Date</th>
+                            <th>Return Date</th>
+                            <th>Days</th>
+                            <th>Total Cost</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var booking in Model.Bookings.OrderByDescending(b => b.BookingID))
+                        {
+                            var days = (booking.ReturnDate - booking.PickupDate).Days + 1;
+                            var isActive = booking.PickupDate <= DateTime.Now && booking.ReturnDate >= DateTime.Now;
+                            var isPast = booking.ReturnDate < DateTime.Now;
+                            var isFuture = booking.PickupDate > DateTime.Now;
+
+                            <tr>
+                                <td><span class="badge bg-primary">@booking.BookingID</span></td>
+                                <td>
+                                    <strong>@booking.Car.CarName</strong><br>
+                                    <small class="text-muted">@booking.Car.Brand @booking.Car.CarModel</small>
+                                </td>
+                                <td>@booking.PickupDate.ToString("MMM dd, yyyy")</td>
+                                <td>@booking.ReturnDate.ToString("MMM dd, yyyy")</td>
+                                <td>@days day@(days != 1 ? "s" : "")</td>
+                                <td><strong>@booking.TotalCost.ToString("C")</strong></td>
+                                <td>
+                                    @if (isActive)
+                                    {
+                                        <span class="badge bg-success">Active</span>
+                                    }
+                                    else if (isPast)
+                                    {
+                                        <span class="badge bg-secondary">Completed</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-warning">Upcoming</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-4">
+                <i class="bi bi-calendar-x display-1 text-muted"></i>
+                <h4 class="text-muted mt-3">No Booking History</h4>
+                <p class="text-muted">This customer hasn't made any bookings yet.</p>
+            </div>
+        }
+    </div>
+</div>

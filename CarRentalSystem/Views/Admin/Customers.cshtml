@@ -1,0 +1,116 @@
+@model IEnumerable<User>
+@{
+    ViewData["Title"] = "Manage Customers";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-people"></i> Manage Customers</h2>
+    <div>
+        <a href="@Url.Action("Dashboard", "Admin")" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+</div>
+
+
+
+<!-- Summary Cards -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card bg-primary text-white">
+            <div class="card-body text-center">
+                <h4>@Model.Count()</h4>
+                <p class="mb-0">Total Customers</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-info text-white">
+            <div class="card-body text-center">
+                <h4>@Model.Sum(c => c.Bookings.Count)</h4>
+                <p class="mb-0">Total Bookings</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-warning text-white">
+            <div class="card-body text-center">
+                <h4>@Model.Sum(c => c.Bookings.Sum(b => b.TotalCost)).ToString("C")</h4>
+                <p class="mb-0">Total Revenue</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Customers Table -->
+<div class="card">
+    <div class="card-header">
+        <h5><i class="bi bi-table"></i> Customer List</h5>
+    </div>
+    <div class="card-body">
+        @if (Model.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Customer ID</th>
+                            <th>Full Name</th>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Total Bookings</th>
+                            <th>Total Spent</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var customer in Model)
+                        {
+                            var totalBookings = customer.Bookings.Count;
+                            var totalSpent = customer.Bookings.Sum(b => b.TotalCost);
+                            var status = totalBookings > 0 ? "Active" : "New";
+                            var statusClass = totalBookings > 0 ? "success" : "secondary";
+
+                            <tr>
+                                <td>@customer.UserID</td>
+                                <td>
+                                    <strong>@customer.FullName</strong>
+                                </td>
+                                <td>@customer.Username</td>
+                                <td>@customer.Email</td>
+                                <td>@customer.PhoneNumber</td>
+                                <td>
+                                    <span class="badge bg-info">@totalBookings</span>
+                                </td>
+                                <td>
+                                    <strong>@totalSpent.ToString("C")</strong>
+                                </td>
+                                <td>
+                                    <span class="badge bg-@statusClass">@status</span>
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a href="@Url.Action("CustomerDetails", new { id = customer.UserID })"
+                                            class="btn btn-sm btn-outline-primary" title="View Details">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-4">
+                <i class="bi bi-people display-1 text-muted"></i>
+                <h4 class="text-muted mt-3">No customers found</h4>
+                <p class="text-muted">No customers have registered yet.</p>
+            </div>
+        }
+    </div>
+</div>
