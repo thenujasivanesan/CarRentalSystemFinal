@@ -43,7 +43,7 @@ namespace CarRentalSystem.Controllers
             return View(model);
         }
 
-        // POST: Bookings/Book
+        // POST: Bookings/Book - Modified to redirect to payment
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Book(BookingViewModel model)
@@ -80,19 +80,16 @@ namespace CarRentalSystem.Controllers
                     CarID = model.CarID,
                     PickupDate = model.PickupDate,
                     ReturnDate = model.ReturnDate,
-                    TotalCost = totalCost
+                    TotalCost = totalCost,
+                    PaymentMethod = "Pending", // Temporary until payment is selected
+                    PaymentStatus = "Pending"
                 };
 
                 _context.Bookings.Add(booking);
-
-                // Mark car as unavailable
-                car!.IsAvailable = false;
-                _context.Update(car);
-
                 await _context.SaveChangesAsync();
 
-                TempData["Success"] = "Booking confirmed successfully!";
-                return RedirectToAction("MyBookings");
+                // Redirect to payment page instead of MyBookings
+                return RedirectToAction("Payment", new { bookingId = booking.BookingID });
             }
 
             // Reload car data for the view
@@ -174,6 +171,83 @@ namespace CarRentalSystem.Controllers
                 return RedirectToAction("All");
             else
                 return RedirectToAction("MyBookings");
+        }
+
+        // GET: Bookings/Payment/5
+        public async Task<IActionResult> Payment(int bookingId)
+        {
+            var authResult = RequireCustomer();
+            if (authResult != null) return authResult;
+
+            var booking = await _context.Bookings
+                .Include(b => b.Car)
+                .FirstOrDefaultAsync(b => b.BookingID == bookingId && b.CustomerID == CurrentUserId);
+
+            if (booking == null)
+            {
+                return NotFound();
+            }
+
+            var model = new PaymentViewModel
+            {
+                BookingID = booking.BookingID,
+                CarName = booking.Car.CarName,
+                TotalCost = booking.TotalCost,
+                PickupDate = booking.PickupDate,
+                ReturnDate = booking.ReturnDate
+            };
+
+            return View(model);
+        }
+
+        // POST: Bookings/ProcessPayment
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ProcessPayment(PaymentViewModel model)
+        {
+            var authResult = RequireCustomer();
+            if (authResult != null) return authResult;
+
+            var booking = await _context.Bookings
+                .Include(b => b.Car)
+                .FirstOrDefaultAsync(b => b.BookingID == model.BookingID && b.CustomerID == CurrentUserId);
+
+            if (booking == null)
+            {
+                return NotFound();
+            }
+
+            // Validate card details if payment method is Card
+            if (model.PaymentMethod == "Card")
+            {
+                if (string.IsNullOrEmpty(model.CardNumber))
+                    ModelState.AddModelError("CardNumber", "Card number is required");
+                if (string.IsNullOrEmpty(model.CardholderName))
+                    ModelState.AddModelError("CardholderName", "Cardholder name is required");
+                if (string.IsNullOrEmpty(model.ExpiryDate))
+                    ModelState.AddModelError("ExpiryDate", "Expiry date is required");
+                if (string.IsNullOrEmpty(model.CVV))
+                    ModelState.AddModelError("CVV", "CVV is required");
+            }
+
+            if (ModelState.IsValid)
+            {
+                // Update booking with payment information
+                booking.PaymentMethod = model.PaymentMethod;
+                booking.PaymentStatus = "Completed";
+
+                // Mark car as unavailable
+                booking.Car.IsAvailable = false;
+                _context.Update(booking.Car);
+                _context.Update(booking);
+
+                await _context.SaveChangesAsync();
+
+                TempData["Success"] = $"Booking confirmed successfully! Payment method: {model.PaymentMethod}";
+                return RedirectToAction("MyBookings");
+            }
+
+            return View("Payment", model);
         }
     }
 }

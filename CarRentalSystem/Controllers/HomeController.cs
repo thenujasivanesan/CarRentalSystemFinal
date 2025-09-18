@@ -25,7 +25,9 @@ namespace CarRentalSystem.Controllers
             // Apply filters
             if (!string.IsNullOrEmpty(searchTerm))
             {
-                carsQuery = carsQuery.Where(c => c.CarName.Contains(searchTerm) || c.CarModel.Contains(searchTerm));
+                carsQuery = carsQuery.Where(c => c.CarName.Contains(searchTerm) || 
+                                               c.CarModel.Contains(searchTerm) || 
+                                               c.Brand.Contains(searchTerm));
             }
 
             if (seats.HasValue)
