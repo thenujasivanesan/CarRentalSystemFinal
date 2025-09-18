@@ -25,7 +25,7 @@
             </div>
         </div>
     </div>
-    
+
     <div class="col-md-3">
         <div class="card bg-success text-white">
             <div class="card-body">
@@ -41,7 +41,7 @@
             </div>
         </div>
     </div>
-    
+
     <div class="col-md-3">
         <div class="card bg-info text-white">
             <div class="card-body">
@@ -57,7 +57,7 @@
             </div>
         </div>
     </div>
-    
+
     <div class="col-md-3">
         <div class="card bg-warning text-white">
             <div class="card-body">
@@ -95,11 +95,18 @@
                         </a>
                     </div>
                     <div class="col-md-3 mb-2">
+                        <a href="@Url.Action("Customers", "Admin")" class="btn btn-outline-warning w-100">
+                            <i class="bi bi-people"></i> Manage Customers
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-2">
                         <a href="@Url.Action("All", "Bookings")" class="btn btn-outline-info w-100">
                             <i class="bi bi-calendar-check"></i> View All Bookings
                         </a>
                     </div>
-                    <div class="col-md-3 mb-2">
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-2">
                         <a href="@Url.Action("Index", "Reports")" class="btn btn-outline-success w-100">
                             <i class="bi bi-file-earmark-text"></i> Generate Reports
                         </a>
@@ -147,7 +154,7 @@
                             </tbody>
                         </table>
                     </div>
-                    
+
                     <div class="text-center mt-3">
                         <a href="@Url.Action("All", "Bookings")" class="btn btn-outline-primary">
                             View All Bookings <i class="bi bi-arrow-right"></i>

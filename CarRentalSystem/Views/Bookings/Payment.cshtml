@@ -1,0 +1,149 @@
+@model PaymentViewModel
+@{
+    ViewData["Title"] = "Payment";
+}
+
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="@Url.Action("Index", "Home")">Home</a></li>
+        <li class="breadcrumb-item"><a href="@Url.Action("MyBookings")">My Bookings</a></li>
+        <li class="breadcrumb-item active">Payment</li>
+    </ol>
+</nav>
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h4><i class="bi bi-credit-card"></i> Payment Method</h4>
+            </div>
+            <div class="card-body">
+                <!-- Booking Summary -->
+                <div class="alert alert-info mb-4">
+                    <h6><i class="bi bi-info-circle"></i> Booking Summary</h6>
+                    <p class="mb-1"><strong>Car:</strong> @Model.CarName</p>
+                    <p class="mb-1"><strong>Pickup:</strong> @Model.PickupDate.ToString("MMM dd, yyyy")</p>
+                    <p class="mb-1"><strong>Return:</strong> @Model.ReturnDate.ToString("MMM dd, yyyy")</p>
+                    <p class="mb-0"><strong>Total Cost:</strong> <span class="text-success">$@Model.TotalCost.ToString("F2")</span></p>
+                </div>
+
+                <form asp-action="ProcessPayment" method="post">
+                    <input asp-for="BookingID" type="hidden" />
+                    <input asp-for="CarName" type="hidden" />
+                    <input asp-for="TotalCost" type="hidden" />
+                    <input asp-for="PickupDate" type="hidden" />
+                    <input asp-for="ReturnDate" type="hidden" />
+
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <!-- Payment Method Selection -->
+                    <div class="mb-4">
+                        <h5>Choose Payment Method</h5>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="card payment-option" onclick="selectPayment('Cash')">
+                                    <div class="card-body text-center">
+                                        <i class="bi bi-cash-coin display-4 text-success"></i>
+                                        <h6 class="mt-2">Pay in Cash</h6>
+                                        <p class="text-muted small">Pay when you pick up the car</p>
+                                        <input type="radio" asp-for="PaymentMethod" value="Cash" class="form-check-input" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="card payment-option" onclick="selectPayment('Card')">
+                                    <div class="card-body text-center">
+                                        <i class="bi bi-credit-card display-4 text-primary"></i>
+                                        <h6 class="mt-2">Pay by Card</h6>
+                                        <p class="text-muted small">Secure online payment</p>
+                                        <input type="radio" asp-for="PaymentMethod" value="Card" class="form-check-input" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card Details (Hidden by default) -->
+                    <div id="cardDetails" style="display: none;">
+                        <h5>Card Details</h5>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="CardNumber" class="form-label"></label>
+                                <input asp-for="CardNumber" class="form-control" placeholder="1234 5678 9012 3456" />
+                                <span asp-validation-for="CardNumber" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="CardholderName" class="form-label"></label>
+                                <input asp-for="CardholderName" class="form-control" placeholder="John Doe" />
+                                <span asp-validation-for="CardholderName" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="ExpiryDate" class="form-label"></label>
+                                <input asp-for="ExpiryDate" class="form-control" placeholder="MM/YY" />
+                                <span asp-validation-for="ExpiryDate" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="CVV" class="form-label"></label>
+                                <input asp-for="CVV" class="form-control" placeholder="123" />
+                                <span asp-validation-for="CVV" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-success btn-lg" id="confirmBtn" disabled>
+                            <i class="bi bi-check-circle"></i> Confirm Payment
+                        </button>
+                        <a href="@Url.Action("MyBookings")" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left"></i> Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        function selectPayment(method) {
+            // Update radio button
+            document.querySelector(`input[value="${method}"]`).checked = true;
+            
+            // Show/hide card details
+            const cardDetails = document.getElementById('cardDetails');
+            const confirmBtn = document.getElementById('confirmBtn');
+            
+            if (method === 'Card') {
+                cardDetails.style.display = 'block';
+            } else {
+                cardDetails.style.display = 'none';
+            }
+            
+            // Enable confirm button
+            confirmBtn.disabled = false;
+            
+            // Update visual selection
+            document.querySelectorAll('.payment-option').forEach(option => {
+                option.classList.remove('border-primary');
+            });
+            event.currentTarget.classList.add('border-primary');
+        }
+    </script>
+    
+    <style>
+        .payment-option {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .payment-option:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .payment-option.border-primary {
+            border: 2px solid #0d6efd !important;
+        }
+    </style>
+}

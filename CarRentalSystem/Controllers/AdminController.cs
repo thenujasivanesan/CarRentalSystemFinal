@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using CarRentalSystem.Data;
+using CarRentalSystem.Models;
 
 namespace CarRentalSystem.Controllers
 {
@@ -37,6 +38,49 @@ namespace CarRentalSystem.Controllers
                 .ToListAsync();
 
             return View(recentBookings);
+        }
+
+        // GET: Admin/Customers
+        public async Task<IActionResult> Customers()
+        {
+            var authResult = RequireAdmin();
+            if (authResult != null) return authResult;
+
+            var customers = await _context.Users
+                .Where(u => u.Role == "Customer")
+                .Include(u => u.Bookings)
+                .OrderBy(c => c.FullName)
+                .ToListAsync();
+
+            return View(customers);
+        }
+
+        // GET: Admin/CustomerDetails/5
+        public async Task<IActionResult> CustomerDetails(int id)
+        {
+            var authResult = RequireAdmin();
+            if (authResult != null) return authResult;
+
+            var customer = await _context.Users
+                .Include(u => u.Bookings)
+                    .ThenInclude(b => b.Car)
+                .FirstOrDefaultAsync(u => u.UserID == id && u.Role == "Customer");
+
+            if (customer == null)
+            {
+                return NotFound();
+            }
+
+            // Calculate customer statistics
+            var totalBookings = customer.Bookings.Count;
+            var totalSpent = customer.Bookings.Sum(b => b.TotalCost);
+            var avgBookingValue = totalBookings > 0 ? totalSpent / totalBookings : 0;
+
+            ViewBag.TotalBookings = totalBookings;
+            ViewBag.TotalSpent = totalSpent;
+            ViewBag.AvgBookingValue = avgBookingValue;
+
+            return View(customer);
         }
     }
 }

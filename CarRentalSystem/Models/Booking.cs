@@ -24,6 +24,11 @@ namespace CarRentalSystem.Models
         [Column(TypeName = "decimal(10,2)")]
         public decimal TotalCost { get; set; }
 
+        [Required(ErrorMessage = "Payment method is required")]
+        public string PaymentMethod { get; set; } = "Cash"; // "Cash" or "Card"
+
+        public string? PaymentStatus { get; set; } = "Pending"; // "Pending", "Completed", "Failed"
+
         // Navigation properties
         public virtual User Customer { get; set; } = null!;
         public virtual Car Car { get; set; } = null!;
