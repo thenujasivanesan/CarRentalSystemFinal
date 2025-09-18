@@ -89,61 +89,7 @@
     </div>
 </div>
 
-<!-- Customer Status -->
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <h5><i class="bi bi-info-circle"></i> Customer Status</h5>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-3">
-                        <div class="text-center">
-                            @if (ViewBag.TotalBookings > 0)
-                            {
-                                <span class="badge bg-success fs-6">Active Customer</span>
-                            }
-                            else
-                            {
-                                <span class="badge bg-secondary fs-6">New Customer</span>
-                            }
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="text-center">
-                            @if (ViewBag.TotalBookings >= 5)
-                            {
-                                <span class="badge bg-warning fs-6">Frequent Customer</span>
-                            }
-                            else if (ViewBag.TotalBookings >= 3)
-                            {
-                                <span class="badge bg-info fs-6">Regular Customer</span>
-                            }
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="text-center">
-                            @if (ViewBag.TotalSpent >= 500)
-                            {
-                                <span class="badge bg-danger fs-6">VIP Customer</span>
-                            }
-                            else if (ViewBag.TotalSpent >= 200)
-                            {
-                                <span class="badge bg-primary fs-6">Premium Customer</span>
-                            }
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="text-center">
-                            <span class="badge bg-dark fs-6">Member Since Registration</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+
 
 <!-- Booking History -->
 <div class="card">
